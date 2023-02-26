@@ -1,0 +1,17 @@
+services:
+  db_dev_studia_js_backend:
+    container_name: db_dev_studia_js_backend
+    hostname: db_dev_studia_js_backend
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: db_dev_studia_js_backend
+      MYSQL_DATABASE: db_dev_studia_js_backend
+      MYSQL_USER: db_dev_studia_js_backend
+      MYSQL_PASSWORD: db_dev_studia_js_backend
+    ports:
+      - 2400:3306
+    volumes:
+      - db_dev_studia_js_backend_data:/var/lib/mysql
+volumes:
+  db_dev_studia_js_backend_data:

@@ -1,6 +1,2 @@
 API ENDPOINTS:
-
-Users:
-GET /users -> get all users
-GET /users/:id -> get user by id
-POST /users -> create user
+q
