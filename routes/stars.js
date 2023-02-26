@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import {fileURLToPath} from 'url';
-import * as fs from "fs";
+import connection from "../db.js";
 
 const router = express.Router();
 
@@ -33,7 +33,7 @@ router.get("/", (req, res) => {
     res.send("Hello World!");
 });
 
-router.post("/", upload.single("image"), (req, res) => {
+router.post("/", upload.single("image"), async (req, res) => {
     const {name, article} = req.body;
     if (name === undefined || name.length === 0) {
         res.status(400).send({message: "Name is required"});
@@ -45,14 +45,16 @@ router.post("/", upload.single("image"), (req, res) => {
     if (file === undefined) {
         res.status(400).send({message: "Image is required"});
     }
-    res.send({
-        message: "You have added a new start!",
-        data: {
-            name,
-            article,
-            imageUrl: file
-        },
-    });
+    try {
+        const query = `INSERT INTO stars (name, article, imageUrl) VALUES ('${name}', '${article}', '${file.filename}')`;
+        connection.query(query);
+        res.send({
+            message: "You have added a new star!"
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({message: "An error occurred while inserting the data"});
+    }
 });
 
 export default router;
