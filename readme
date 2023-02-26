@@ -1,1 +1,4 @@
 API ENDPOINTS:
+
+stars:
+- POST /starts; expect: form-data => name, article, image
