@@ -1,15 +1,22 @@
 import express from 'express';
 import connection from "./db.js";
+import {createTableUsersQuery} from "./seeder.js";
+import usersRouter from "./routes/users.js";
 
 const app = express();
 const PORT = 5200;
 
-app.get('/users', (req, res) => {
-    connection.query('SELECT * FROM users', (err, results, fields) => {
+//Routes
+app.use('/users', usersRouter);
+
+//Seeder only in dev
+app.get('/seed', (req, res) => {
+
+    connection.query(createTableUsersQuery, (err, result) => {
         if (err) throw err;
-        console.log('User data:', results);
+        console.log('User table created successfully');
     });
-    res.send('GET /users');
+    res.send('User table created successfully');
 });
 
 app.listen(PORT, () => {
