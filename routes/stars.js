@@ -45,16 +45,19 @@ router.post("/", upload.single("image"), async (req, res) => {
     if (file === undefined) {
         res.status(400).send({message: "Image is required"});
     }
-    try {
-        const query = `INSERT INTO stars (name, article, imageUrl) VALUES ('${name}', '${article}', '${file.filename}')`;
-        connection.query(query);
-        res.send({
-            message: "You have added a new star!"
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({message: "An error occurred while inserting the data"});
-    }
+
+    const query = `INSERT INTO stars (name, article, imageUrl) VALUES ('${name}', '${article}', '${file.filename}')`;
+    connection.query(query, (err) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send({message: "An error occurred while inserting the data"});
+        } else {
+            res.send({
+                message: "You have added a new star!"
+            });
+        }
+    });
+
 });
 
 export default router;
