@@ -30,7 +30,35 @@ const storage = multer.diskStorage({
 const upload = multer({storage: storage});
 
 router.get("/", (req, res) => {
-    res.send("Hello World!");
+    const page = parseInt(req.query.page) || 1;
+    const limit = 7;
+    const offset = (page - 1) * limit;
+
+    const countQuery = `SELECT COUNT(*) AS count FROM stars`;
+    const selectQuery = `SELECT * FROM stars LIMIT ${limit} OFFSET ${offset}`;
+
+    connection.query(countQuery, (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send({message: "An error occurred while retrieving the data"});
+        } else {
+            const totalItems = result[0].count;
+            const totalPages = Math.ceil(totalItems / limit);
+            connection.query(selectQuery, (err, selectResult) => {
+                if (err) {
+                    console.error(err);
+                    res.status(500).send({message: "An error occurred while retrieving the data"});
+                } else {
+                    res.status(200).json({
+                        stars: selectResult,
+                        page: page,
+                        totalPages: totalPages,
+                        totalItems: totalItems
+                    });
+                }
+            });
+        }
+    });
 });
 
 router.post("/", upload.single("image"), async (req, res) => {
@@ -52,7 +80,7 @@ router.post("/", upload.single("image"), async (req, res) => {
             console.error(err);
             res.status(500).send({message: "An error occurred while inserting the data"});
         } else {
-            res.send({
+            res.status(200).json({
                 message: "You have added a new star!"
             });
         }
