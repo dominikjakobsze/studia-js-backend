@@ -60,24 +60,29 @@ router.get("/", (req, res) => {
         }
     });
 });
-router.get("/:id", (req, res) => {
+router.get("/:id", async (req, res) => {
     const id = req.params.id;
     const query = `
-        SELECT stars.*, star_constellation.constellationId as '@constellationId'
+        SELECT stars.*, star_constellation.constellationId
         FROM stars 
         LEFT JOIN star_constellation ON stars.id = star_constellation.starId 
-        WHERE stars.id=${id}
+        WHERE stars.id=?
     `;
-    connection.query(query, (err, result) => {
-        if (err) {
-            console.error(err);
-            res.status(500).json({message: "An error occurred while retrieving the data"});
-        } else if (result.length === 0) {
+    try {
+        const [rows] = await connection.promise().query(query, [id]);
+        if (rows.length === 0) {
             res.status(404).json({message: "Star not found"});
         } else {
-            res.status(200).json(result[0]);
+            rows[0].constellationId = rows.map(row => row.constellationId).filter(id => id);
+            const star = {
+                ...rows[0]
+            };
+            res.status(200).json(star);
         }
-    });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: "An error occurred while retrieving the data"});
+    }
 });
 
 
