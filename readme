@@ -1,6 +1,6 @@
 API ENDPOINTS:
 
-desc:
+Status Codes that I use and their meaning:
 400 - bad request => problem with user data ec. (validation)
 404 - not found => resource not found
 500 - internal server error => server error, processing

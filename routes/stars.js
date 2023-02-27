@@ -131,67 +131,64 @@ router.patch("/:id", upload.single("image"), async (req, res) => {
     }
 
     if (constellationId) {
-        const checkConstellationQuery = `SELECT * FROM constellations WHERE id=${constellationId}`;
-        connection.query(checkConstellationQuery, (err, result) => {
-            if (err) {
-                console.error(err);
-                res.status(500).send({message: "An error occurred while checking for the constellation"});
-            } else if (result.length === 0) {
+        try {
+            const checkConstellationQuery = `SELECT * FROM constellations WHERE id=${constellationId}`;
+            const [constellationResult] = await connection.promise().query(checkConstellationQuery);
+            if (constellationResult.length === 0) {
                 res.status(400).send({message: "Constellation does not exist"});
+                return;
             } else {
                 const checkStarQuery = `SELECT * FROM stars WHERE id=${req.params.id}`;
-                connection.query(checkStarQuery, (err, result) => {
-                    if (err) {
-                        console.error(err);
-                        res.status(500).send({message: "An error occurred while checking for the star"});
-                    } else if (result.length === 0) {
-                        res.status(400).send({message: "Star does not exist"});
+                const [starResult] = await connection.promise().query(checkStarQuery);
+                if (starResult.length === 0) {
+                    res.status(400).send({message: "Star does not exist"});
+                    return;
+                } else {
+                    const query = `SELECT * FROM star_constellation WHERE starId=${req.params.id} AND constellationId=${constellationId}`;
+                    const [existingRecordResult] = await connection.promise().query(query);
+                    if (existingRecordResult.length > 0) {
+                        res.status(400).send({message: "Star is already assigned to this constellation"});
+                        return;
                     } else {
-                        const query = `SELECT * FROM star_constellation WHERE starId=${req.params.id} AND constellationId=${constellationId}`;
-                        connection.query(query, (err, result) => {
-                            if (err) {
-                                console.error(err);
-                                res.status(500).send({message: "An error occurred while checking for existing record"});
-                            } else if (result.length > 0) {
-                                res.status(400).send({message: "Star is already assigned to this constellation"});
-                            } else {
-                                const insertQuery = `INSERT INTO star_constellation (starId, constellationId) VALUES (${req.params.id}, ${constellationId})`;
-                                connection.query(insertQuery, (err) => {
-                                    if (err) {
-                                        console.error(err);
-                                        res.status(500).send({message: "An error occurred while inserting the data"});
-                                    }
-                                });
-                            }
-                        });
+                        const insertQuery = `INSERT INTO star_constellation (starId, constellationId) VALUES (${req.params.id}, ${constellationId})`;
+                        await connection.promise().query(insertQuery);
                     }
-                });
+                }
             }
-        });
-        checker = true;
+            checker = true;
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({message: "An error occurred while checking for the constellation"});
+            return;
+        }
     }
-
 
     if (checker === false && setClause.length === 0) {
         res.status(400).send({message: "No fields to update"});
+        return;
     } else if (checker === true && setClause.length === 0) {
         res.status(200).json({
             message: `Star was updated successfully!`
         });
+        return;
     } else {
         const query = `UPDATE stars SET ${setClause.join(", ")} WHERE id = ${req.params.id}`;
-        connection.query(query, (err, result) => {
-            if (err) {
-                console.error(err);
-                res.status(500).send({message: "An error occurred while updating the data"});
-            } else if (result.affectedRows === 0) {
+        try {
+            const [result] = await connection.promise().query(query);
+            if (result.affectedRows === 0) {
                 res.status(404).send({message: "Star not found"});
+                return;
             } else {
                 res.status(200).json({
                     message: `Star was updated successfully!`
                 });
+                return;
             }
-        });
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({message: "An error occurred while updating the data"});
+            return;
+        }
     }
 });
 
