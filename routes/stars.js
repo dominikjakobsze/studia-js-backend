@@ -63,9 +63,9 @@ router.get("/", (req, res) => {
 router.get("/:id", (req, res) => {
     const id = req.params.id;
     const query = `
-        SELECT stars.*, star_constellation.constellationId 
+        SELECT stars.*, star_constellation.constellationId as '@constellationId'
         FROM stars 
-        INNER JOIN star_constellation ON stars.id = star_constellation.starId 
+        LEFT JOIN star_constellation ON stars.id = star_constellation.starId 
         WHERE stars.id=${id}
     `;
     connection.query(query, (err, result) => {
@@ -105,7 +105,45 @@ router.post("/", upload.single("image"), async (req, res) => {
             });
         }
     });
-
 });
+
+router.patch("/:id", upload.single("image"), async (req, res) => {
+    const {name, article, shine, constellationId, turned} = req.body || {};
+
+    const setClause = [];
+    if (name) {
+        setClause.push(`name = '${name}'`);
+    }
+    if (article) {
+        setClause.push(`article = '${article}'`);
+    }
+    if (shine) {
+        setClause.push(`shine = ${shine}`);
+    }
+    if (turned) {
+        setClause.push(`turned = ${turned}`);
+    }
+
+    if (setClause.length === 0) {
+        res.status(400).send({message: "No fields to update"});
+        return;
+    }
+
+    const query = `UPDATE stars SET ${setClause.join(", ")} WHERE id = ${req.params.id}`;
+
+    connection.query(query, (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send({message: "An error occurred while updating the data"});
+        } else if (result.affectedRows === 0) {
+            res.status(404).send({message: "Star not found"});
+        } else {
+            res.status(200).json({
+                message: `Star was updated successfully!`
+            });
+        }
+    });
+});
+
 
 export default router;
