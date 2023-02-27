@@ -192,5 +192,16 @@ router.patch("/:id", upload.single("image"), async (req, res) => {
     }
 });
 
+router.delete("/:id", async (req, res) => {
+    const starId = req.params.id;
+    try {
+        await connection.promise().query("DELETE FROM star_constellation WHERE starId = ?", [starId]);
+        await connection.promise().query("DELETE FROM stars WHERE id = ?", [starId]);
 
+        res.status(200).json({message: "Star and constellation deleted successfully"});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: "An error occurred while deleting the data"});
+    }
+});
 export default router;

@@ -11,8 +11,12 @@ stars:
 - POST /stars; expect: form-data => name, article, image
 - GET /stars; expect: query => page (optional)
 - GET /stars/:id; expect: params => id
+- DELETE /stars/:id; expect: params => id
+- PATCH /stars/:id; expect: params => id, form-data => name, article, image, shine, turned, constellationId, file (all optional)
 
 constellations:
 - POST /constellations; expect: form-data => name, article, image
 - GET /constellations; expect: query => page (optional)
 - GET /constellations/:id; expect: params => id
+- DELETE /constellations/:id; expect: params => id
+- PATCH /constellations/:id; expect: params => id, form-data => name, article, image, shine, turned, constellationId, file (all optional)
