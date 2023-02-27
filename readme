@@ -1,3 +1,41 @@
+Opis:
+Jest to backend wykonany na potrzeby projektu "Planer Nocnego Nieba", zawiera on wszystkie potrzebne naszym zdaniem
+endpointy, posiada funkcjonalności wymagane w "specyfikacji" projektu oraz dodatkowe, które uznaliśmy za potrzebne.
+Dodatkowo dołączony został docker-compose.yaml, który zawiera bazę danych MySQL. Baza danych jest skonfigurowana, jeśli jednak
+istnieje potrzeba połączenia jej z np: tableplus, należy skorzystać z następujących danych:
+
+- login: db_dev_studia_js_backend
+- hasło: db_dev_studia_js_backend
+- nazwa bazy danych: db_dev_studia_js_backend
+- host: localhost:2400 / 127.0.0.1:2400
+
+Poniżej wyszczególnione zostały endpointy, biblioteki, wszystkie kody statusu, które zwracamy
+oraz technologie użyte w projekcie.
+
+./index.js => główny plik, który zawiera konfigurację serwera, wszystkie routy oraz seeder tabeli bazy danych dostępny pod
+/seed oraz konfigurację folderu, w którym znajdują się uploadowane pliki.
+
+./uploads => folder, w którym znajdują się uploadowane pliki
+
+./routes => folder, w którym znajdują się wszystkie routy
+
+./db.js => plik, w którym znajduje się konfiguracja bazy danych
+
+./seeder.js => plik, w którym znajduje się (kwerendy) seeder tabeli, bazy danych
+
+
+Stack:
+
+Backend w node.js i express.js
+Relacyjna baza danych MySQL
+
+
+Biblioteki:
+
+multer - do obsługi plików i form-data
+mysql2 - do obsługi relacyjnej bazy danych
+
+
 API ENDPOINTS:
 
 Status Codes that I use and their meaning:
