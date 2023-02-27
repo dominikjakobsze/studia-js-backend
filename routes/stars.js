@@ -40,14 +40,14 @@ router.get("/", (req, res) => {
     connection.query(countQuery, (err, result) => {
         if (err) {
             console.error(err);
-            res.status(500).send({message: "An error occurred while retrieving the data"});
+            res.status(500).json({message: "An error occurred while retrieving the data"});
         } else {
             const totalItems = result[0].count;
             const totalPages = Math.ceil(totalItems / limit);
             connection.query(selectQuery, (err, selectResult) => {
                 if (err) {
                     console.error(err);
-                    res.status(500).send({message: "An error occurred while retrieving the data"});
+                    res.status(500).json({message: "An error occurred while retrieving the data"});
                 } else {
                     res.status(200).json({
                         stars: selectResult,
@@ -60,6 +60,26 @@ router.get("/", (req, res) => {
         }
     });
 });
+router.get("/:id", (req, res) => {
+    const id = req.params.id;
+    const query = `
+        SELECT stars.*, star_constellation.constellationId 
+        FROM stars 
+        INNER JOIN star_constellation ON stars.id = star_constellation.starId 
+        WHERE stars.id=${id}
+    `;
+    connection.query(query, (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).json({message: "An error occurred while retrieving the data"});
+        } else if (result.length === 0) {
+            res.status(404).json({message: "Star not found"});
+        } else {
+            res.status(200).json(result[0]);
+        }
+    });
+});
+
 
 router.post("/", upload.single("image"), async (req, res) => {
     const {name, article} = req.body;
