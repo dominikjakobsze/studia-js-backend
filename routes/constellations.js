@@ -115,5 +115,102 @@ router.post("/", upload.single("image"), async (req, res) => {
     });
 });
 
+router.patch("/:id", upload.single("image"), async (req, res) => {
+    const {name, article, shine, starId, turned} = req.body || {};
+    const file = req.file;
+
+    let checker = false;
+    const setClause = [];
+
+    if (name) {
+        setClause.push(`name = '${name}'`);
+    }
+    if (article) {
+        setClause.push(`article = '${article}'`);
+    }
+    if (shine) {
+        setClause.push(`shine = ${shine}`);
+    }
+    if (turned) {
+        setClause.push(`turned = ${turned}`);
+    }
+    if (file) {
+        setClause.push(`imageUrl = '${file.filename}'`);
+    }
+
+    if (starId) {
+        try {
+            const checkConstellationQuery = `SELECT * FROM constellations WHERE id=${req.params.id}`;
+            const [constellationResult] = await connection.promise().query(checkConstellationQuery);
+            if (constellationResult.length === 0) {
+                res.status(400).send({message: "Constellation does not exist"});
+                return;
+            } else {
+                const checkStarQuery = `SELECT * FROM stars WHERE id=${starId}`;
+                const [starResult] = await connection.promise().query(checkStarQuery);
+                if (starResult.length === 0) {
+                    res.status(400).send({message: "Star does not exist"});
+                    return;
+                } else {
+                    const query = `SELECT * FROM star_constellation WHERE constellationId=${req.params.id} AND starId=${starId}`;
+                    const [existingRecordResult] = await connection.promise().query(query);
+                    if (existingRecordResult.length > 0) {
+                        res.status(400).send({message: "Constellation is already assigned to this star"});
+                        return;
+                    } else {
+                        const insertQuery = `INSERT INTO star_constellation (constellationId, starId) VALUES (${req.params.id}, ${constellationId})`;
+                        await connection.promise().query(insertQuery);
+                    }
+                }
+            }
+            checker = true;
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({message: "An error occurred while processing the data"});
+            return;
+        }
+    }
+
+    if (checker === false && setClause.length === 0) {
+        res.status(400).send({message: "No fields to update"});
+        return;
+    } else if (checker === true && setClause.length === 0) {
+        res.status(200).json({
+            message: `Constellation was updated successfully!`
+        });
+        return;
+    } else {
+        const query = `UPDATE constellations SET ${setClause.join(", ")} WHERE id = ${req.params.id}`;
+        try {
+            const [result] = await connection.promise().query(query);
+            if (result.affectedRows === 0) {
+                res.status(404).send({message: "Constellation not found"});
+                return;
+            } else {
+                res.status(200).json({
+                    message: `Constellation was updated successfully!`
+                });
+                return;
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({message: "An error occurred while updating the data"});
+            return;
+        }
+    }
+});
+
+router.delete("/:id", async (req, res) => {
+    const constellationId = req.params.id;
+    try {
+        await connection.promise().query("DELETE FROM star_constellation WHERE constellationId = ?", [constellationId]);
+        await connection.promise().query("DELETE FROM constellations WHERE id = ?", [constellationId]);
+
+        res.status(200).json({message: "Constellation and stars deleted successfully"});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: "An error occurred while deleting the data"});
+    }
+});
 
 export default router;
