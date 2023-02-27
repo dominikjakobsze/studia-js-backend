@@ -24,6 +24,12 @@ oraz technologie użyte w projekcie.
 ./seeder.js => plik, w którym znajduje się (kwerendy) seeder tabeli, bazy danych
 
 
+Komendy:
+
+npm start => włączenie serwera
+docker compose up --build -d => włączenie bazy danych z pliku docker-compose.yaml (wymagany docker!)
+
+
 Stack:
 
 Backend w node.js i express.js
