@@ -1,8 +1,6 @@
 Opis:
-Jest to backend wykonany na potrzeby projektu "Planer Nocnego Nieba", zawiera on wszystkie potrzebne naszym zdaniem
-endpointy, posiada funkcjonalności wymagane w "specyfikacji" projektu oraz dodatkowe, które uznaliśmy za potrzebne.
-Dodatkowo dołączony został docker-compose.yaml, który zawiera bazę danych MySQL. Baza danych jest skonfigurowana, jeśli jednak
-istnieje potrzeba połączenia jej z np: tableplus, należy skorzystać z następujących danych:
+Jest to backend wykonany na potrzeby projektu "Planer Nocnego Nieba", zawiera on wszystkie potrzebne naszym zdaniem endpointy, posiada funkcjonalności wymagane w "specyfikacji" projektu oraz dodatkowe, które uznaliśmy za potrzebne.
+Dodatkowo dołączony został docker-compose.yaml, który zawiera bazę danych MySQL. Baza danych jest skonfigurowana, jeśli jednak istnieje potrzeba połączenia jej z np: tableplus, należy skorzystać z następujących danych:
 
 - login: db_dev_studia_js_backend
 - hasło: db_dev_studia_js_backend
