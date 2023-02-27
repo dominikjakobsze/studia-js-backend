@@ -82,7 +82,7 @@ router.get("/:id", (req, res) => {
 
 
 router.post("/", upload.single("image"), async (req, res) => {
-    const {name, article} = req.body;
+    const {name, article} = req.body || {};
     if (name === undefined || name.length === 0) {
         res.status(400).send({message: "Name is required"});
     }

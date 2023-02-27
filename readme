@@ -1,13 +1,18 @@
 API ENDPOINTS:
 
 desc:
-400 - bad request => problem with user data
+400 - bad request => problem with user data ec. (validation)
 404 - not found => resource not found
 500 - internal server error => server error, processing
 200 - ok => success
 
 
 stars:
-- POST /starts; expect: form-data => name, article, image
-- GET /stars; expect: query => page
+- POST /stars; expect: form-data => name, article, image
+- GET /stars; expect: query => page (optional)
 - GET /stars/:id; expect: params => id
+
+constellations:
+- POST /constellations; expect: form-data => name, article, image
+- GET /constellations; expect: query => page (optional)
+- GET /constellations/:id; expect: params => id

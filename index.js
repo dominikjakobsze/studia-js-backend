@@ -2,6 +2,7 @@ import express from 'express';
 import {createStarsTable, createStarConstellationTable, createConstellationsTable} from "./seeder.js";
 import connection from "./db.js";
 import starsRouter from "./routes/stars.js";
+import constellationsRouter from "./routes/constellations.js";
 import path from "path";
 import {fileURLToPath} from "url";
 
@@ -16,6 +17,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //Routes
 app.use('/stars', starsRouter);
+app.use('/constellations', constellationsRouter);
 
 
 //Seeder only in dev
