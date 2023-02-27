@@ -109,8 +109,11 @@ router.post("/", upload.single("image"), async (req, res) => {
 
 router.patch("/:id", upload.single("image"), async (req, res) => {
     const {name, article, shine, constellationId, turned} = req.body || {};
+    const file = req.file;
 
+    let checker = false;
     const setClause = [];
+
     if (name) {
         setClause.push(`name = '${name}'`);
     }
@@ -123,26 +126,73 @@ router.patch("/:id", upload.single("image"), async (req, res) => {
     if (turned) {
         setClause.push(`turned = ${turned}`);
     }
-
-    if (setClause.length === 0) {
-        res.status(400).send({message: "No fields to update"});
-        return;
+    if (file) {
+        setClause.push(`imageUrl = '${file.filename}'`);
     }
 
-    const query = `UPDATE stars SET ${setClause.join(", ")} WHERE id = ${req.params.id}`;
+    if (constellationId) {
+        const checkConstellationQuery = `SELECT * FROM constellations WHERE id=${constellationId}`;
+        connection.query(checkConstellationQuery, (err, result) => {
+            if (err) {
+                console.error(err);
+                res.status(500).send({message: "An error occurred while checking for the constellation"});
+            } else if (result.length === 0) {
+                res.status(400).send({message: "Constellation does not exist"});
+            } else {
+                const checkStarQuery = `SELECT * FROM stars WHERE id=${req.params.id}`;
+                connection.query(checkStarQuery, (err, result) => {
+                    if (err) {
+                        console.error(err);
+                        res.status(500).send({message: "An error occurred while checking for the star"});
+                    } else if (result.length === 0) {
+                        res.status(400).send({message: "Star does not exist"});
+                    } else {
+                        const query = `SELECT * FROM star_constellation WHERE starId=${req.params.id} AND constellationId=${constellationId}`;
+                        connection.query(query, (err, result) => {
+                            if (err) {
+                                console.error(err);
+                                res.status(500).send({message: "An error occurred while checking for existing record"});
+                            } else if (result.length > 0) {
+                                res.status(400).send({message: "Star is already assigned to this constellation"});
+                            } else {
+                                const insertQuery = `INSERT INTO star_constellation (starId, constellationId) VALUES (${req.params.id}, ${constellationId})`;
+                                connection.query(insertQuery, (err) => {
+                                    if (err) {
+                                        console.error(err);
+                                        res.status(500).send({message: "An error occurred while inserting the data"});
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        checker = true;
+    }
 
-    connection.query(query, (err, result) => {
-        if (err) {
-            console.error(err);
-            res.status(500).send({message: "An error occurred while updating the data"});
-        } else if (result.affectedRows === 0) {
-            res.status(404).send({message: "Star not found"});
-        } else {
-            res.status(200).json({
-                message: `Star was updated successfully!`
-            });
-        }
-    });
+
+    if (checker === false && setClause.length === 0) {
+        res.status(400).send({message: "No fields to update"});
+    } else if (checker === true && setClause.length === 0) {
+        res.status(200).json({
+            message: `Star was updated successfully!`
+        });
+    } else {
+        const query = `UPDATE stars SET ${setClause.join(", ")} WHERE id = ${req.params.id}`;
+        connection.query(query, (err, result) => {
+            if (err) {
+                console.error(err);
+                res.status(500).send({message: "An error occurred while updating the data"});
+            } else if (result.affectedRows === 0) {
+                res.status(404).send({message: "Star not found"});
+            } else {
+                res.status(200).json({
+                    message: `Star was updated successfully!`
+                });
+            }
+        });
+    }
 });
 
 
